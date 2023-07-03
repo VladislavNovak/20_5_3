@@ -152,7 +152,31 @@ int findIndexInVector(vector<T> const &source, const T &key) {
 void displayDataToScreen(vector<string> const &data, const string &msg) {
     std::cout << msg << ": " << std::endl;
     for (int i = 0; i < data.size(); ++i) {
-        std::cout << i << ": " << data[i] << ((i % 5) == 4 ? "\n" : " ");
+        std::cout << i << ": " << data[i] << ((i % 5) == 4 ? "\n" : ", ");
+    }
+    std::cout << std::endl;
+}
+
+int getIndexOfSelectedFish(vector<string> const &fishList) {
+    displayDataToScreen(fishList, "Выберите, какую рыбу будете ловить из данных видов");
+    return getUserNumeric("Введите цифру", 0, (int)(fishList.size() - 1));
+}
+
+vector<string> getListOfFishInRiver(vector<string> const &fishList) {
+    int numberOfRandomFish = getRandomIntFromRange(5, (int)(fishList.size() - 1));
+    return getShuffledRange(fishList, numberOfRandomFish);
+}
+
+bool hasFishCaught(vector<string> const &fishList, vector<string> const &listOfFishInRiver, const int indexOfSelectedFish) {
+    displayDataToScreen(listOfFishInRiver, "В реке были");
+    int foundIndex = findIndexInVector(listOfFishInRiver, fishList[indexOfSelectedFish]);
+
+    if (foundIndex == -1) {
+        std::cout << "В реке не оказалось выбранной рыбы" << std::endl;
+        return false;
+    } else {
+        std::cout << "Поймана одна рыба: " << fishList[indexOfSelectedFish] << std::endl;
+        return true;
     }
 }
 
@@ -165,29 +189,22 @@ int main() {
     const char* pathName = R"(../fish_list.txt)";
     vector<string> fishList;
 
+    // Читаем данные из файла. В данном случае - перечень рыб
     bool isReadFileSuccessfully = readFileToVector(pathName, fishList);
 
     if (!isReadFileSuccessfully) {
-        printf("%s не обнаружен.\n"
-               "Он должен находиться в директории с исполняемым файлом!\n", pathName);
+        printf("%s не обнаружен. Он должен находиться в директории с исполняемым файлом!\n", pathName);
         return 1;
     }
 
-    displayDataToScreen(fishList, "Выберите, какую рыбу будете ловить из данных видов");
+    // Получаем индекс рыбы, которую пользователь собирается ловить
+    int indexOfSelectedFish = getIndexOfSelectedFish(fishList);
 
-    string selectedFish = fishList[getUserNumeric("Введите цифру", 0, (int)(fishList.size() - 1))];
+    // Получаем список случайных рыб, которые прямо сейчас находятся в реке
+    vector<string> listOfFishInRiver = getListOfFishInRiver(fishList);
 
-    vector<string> listOfFishInRiver = getShuffledRange(fishList, getRandomIntFromRange(5, (int)(fishList.size() - 1)));
+    // Поймана ли рыба
+    bool isFishCaught = hasFishCaught(fishList, listOfFishInRiver, indexOfSelectedFish);
 
-    displayDataToScreen(listOfFishInRiver, "В реке были");
-
-    int foundIndex = findIndexInVector(listOfFishInRiver, selectedFish);
-
-    std::cout << "Результат: " << foundIndex << std::endl;
-
-    if (foundIndex == -1) {
-        std::cout << "В реке не оказалось выбранной рыбы" << std::endl;
-    } else {
-        std::cout << "Поймана одна рыба: " << selectedFish << std::endl;
-    }
+    std::cout << isFishCaught << std::endl;
 }

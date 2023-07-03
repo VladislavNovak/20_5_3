@@ -28,8 +28,6 @@
 - 
 ### <font color="tomato">Полезные ссылки</font>
 
-По алгоритму copy и copy_n:
-
 [Что такое функция copy](https://codelessons.ru/cplusplus/funkciya-copy-v-c-legko-i-ponyatno.html)
 
 [Runebook.dev. std::copy_n](https://runebook.dev/ru/docs/cpp/algorithm/copy_n)
