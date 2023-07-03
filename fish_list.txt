@@ -1,0 +1,35 @@
+anchovy
+barracuda
+bream
+carp
+catfish
+cisco
+chum salmon
+cod
+carp
+dorado
+eel
+flounder
+grouper
+haddock
+hake
+halibut
+herring
+ide
+mackerel
+mullet
+roach
+perch
+pike
+pink salmon
+piranha
+sea bass
+salmon
+shark
+smelt
+sprat
+sturgeon
+tilapia
+trout
+tuna
+whitefish
