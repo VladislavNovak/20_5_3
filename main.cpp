@@ -149,16 +149,28 @@ int findIndexInVector(vector<T> const &source, const T &key) {
     return NOT_FOUND;
 }
 
-void displayDataToScreen(vector<string> const &data, const string &msg) {
-    std::cout << msg << ": " << std::endl;
+void outputData(std::ostream &out, vector<string> const &data, const string &format = " ", bool isNumbering = false) {
     for (int i = 0; i < data.size(); ++i) {
-        std::cout << i << ": " << data[i] << ((i % 5) == 4 ? "\n" : ", ");
+        string outputStr = isNumbering ? std::to_string(i) + ": " + data[i] : data[i];
+        out << outputStr << (i != data.size() - 1 ? format : "");
     }
-    std::cout << std::endl;
+    out << std::endl;
+}
+
+void displayDataToScreen(vector<string> const &data, const string &msg, const string &format = ", ", bool isNumbering = false) {
+    std::cout << msg << ": " << std::endl;
+    outputData(std::cout, data, format, isNumbering);
+}
+
+void writeDataToFile(const char* path, vector<string> const &data, bool isAppendMode = false, const string &format = ",") {
+    std::ofstream file(path, (isAppendMode ? std::ios::app : std::ios::out));
+    outputData(file, data, format);
+    file.close();
 }
 
 int getIndexOfSelectedFish(vector<string> const &fishList) {
-    displayDataToScreen(fishList, "Выберите, какую рыбу будете ловить из данных видов");
+    string msg = "Выберите, какую рыбу будете ловить из данных видов";
+    displayDataToScreen(fishList, msg, ", ", true);
     return getUserNumeric("Введите цифру", 0, (int)(fishList.size() - 1));
 }
 
@@ -186,14 +198,15 @@ int main() {
 
     std::srand(std::time(nullptr)); // NOLINT(cert-msc51-cpp)
 
-    const char* pathName = R"(../fish_list.txt)";
+    const char* pathNameOfFishList = R"(../fish_list.txt)";
+    const char* pathNameOfBasket = R"(../basket.txt)";
     vector<string> fishList;
 
     // Читаем данные из файла. В данном случае - перечень рыб
-    bool isReadFileSuccessfully = readFileToVector(pathName, fishList);
+    bool isReadFileSuccessfully = readFileToVector(pathNameOfFishList, fishList);
 
     if (!isReadFileSuccessfully) {
-        printf("%s не обнаружен. Он должен находиться в директории с исполняемым файлом!\n", pathName);
+        printf("%s не обнаружен. Он должен находиться в директории с исполняемым файлом!\n", pathNameOfFishList);
         return 1;
     }
 
@@ -206,5 +219,7 @@ int main() {
     // Поймана ли рыба
     bool isFishCaught = hasFishCaught(fishList, listOfFishInRiver, indexOfSelectedFish);
 
-    std::cout << isFishCaught << std::endl;
+    if (isFishCaught) {
+        writeDataToFile(pathNameOfBasket, { fishList[indexOfSelectedFish] }, true);
+    }
 }
