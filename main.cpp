@@ -7,6 +7,7 @@
 #include <string>
 #include <algorithm> // copy_n
 #include <sstream> // stringstream
+#include <iterator>
 
 using std::string;
 using std::vector;
@@ -162,11 +163,30 @@ void displayDataToScreen(vector<string> const &data, const string &msg, const st
     outputData(std::cout, data, format, isNumbering);
 }
 
+void displayFileToScreen(const char* pathName, string const &msg) {
+    vector<string> data;
+    bool isReadFileSuccessfully = readFileToVector(pathName, data);
+
+    if (!isReadFileSuccessfully) {
+        printf("%s не обнаружен. Он должен находиться в директории с исполняемым файлом!\n", pathName);
+        return;
+    }
+
+    system("cls");
+    if (!data.empty()) {
+        displayDataToScreen(data, msg, ", ");
+    } else {
+        std::cout << "Данных пока нет" << std::endl;
+    }
+}
+
 void writeDataToFile(const char* path, vector<string> const &data, bool isAppendMode = false, const string &format = ",") {
     std::ofstream file(path, (isAppendMode ? std::ios::app : std::ios::out));
     outputData(file, data, format);
     file.close();
 }
+
+// ======================================================================================================
 
 int getIndexOfSelectedFish(vector<string> const &fishList) {
     string msg = "Выберите, какую рыбу будете ловить из данных видов";
@@ -192,6 +212,22 @@ bool hasFishCaught(vector<string> const &fishList, vector<string> const &listOfF
     }
 }
 
+int getIndexOfMenu() {
+    const char* menu[] = {
+            "Продолжить ловить рыбу",
+            "Посмотреть результат и продолжить ловить",
+            "Завершить ловлю и посмотреть результат"
+    };
+
+    int sizeOfMenu = std::end(menu) - std::begin(menu);
+
+    for (int i = 0; i < sizeOfMenu; ++i) {
+        std::cout << i << ": " << menu[i] << std::endl;
+    }
+
+    return getUserNumeric("Введите цифру", 0, (sizeOfMenu - 1));
+}
+
 int main() {
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
@@ -210,16 +246,37 @@ int main() {
         return 1;
     }
 
-    // Получаем индекс рыбы, которую пользователь собирается ловить
-    int indexOfSelectedFish = getIndexOfSelectedFish(fishList);
+    // Основной цикл выполнения
+    while(true) {
+        // Получаем индекс рыбы, которую пользователь собирается ловить
+        int indexOfSelectedFish = getIndexOfSelectedFish(fishList);
 
-    // Получаем список случайных рыб, которые прямо сейчас находятся в реке
-    vector<string> listOfFishInRiver = getListOfFishInRiver(fishList);
+        // Получаем список случайных рыб, которые прямо сейчас находятся в реке
+        vector<string> listOfFishInRiver = getListOfFishInRiver(fishList);
 
-    // Поймана ли рыба
-    bool isFishCaught = hasFishCaught(fishList, listOfFishInRiver, indexOfSelectedFish);
+        // Поймана ли рыба
+        bool isFishCaught = hasFishCaught(fishList, listOfFishInRiver, indexOfSelectedFish);
 
-    if (isFishCaught) {
-        writeDataToFile(pathNameOfBasket, { fishList[indexOfSelectedFish] }, true);
+        if (isFishCaught) {
+            writeDataToFile(pathNameOfBasket, { fishList[indexOfSelectedFish] }, true);
+        }
+
+        // Выбираем из меню дальнейшее действие
+        int indexOfMenu = getIndexOfMenu();
+
+        switch (indexOfMenu) {
+            case 0:
+                system("cls");
+                continue;
+            case 1:
+                displayFileToScreen(pathNameOfBasket, "Сейчас выловлено");
+                continue;
+            default:
+                displayFileToScreen(pathNameOfBasket, "Сейчас выловлено");
+        }
+
+        break;
     }
+
+    std::cout << "Игра окончена!" << std::endl;
 }
